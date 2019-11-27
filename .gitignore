@@ -1,0 +1,4 @@
+.idea
+myuser
+*.tmp
+routers/commentsRouter*
