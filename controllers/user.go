@@ -100,7 +100,7 @@ func (u *UserController) Delete() {
 func (u *UserController) Auth() {
 	username := u.GetString("username")
 	password := u.GetString("password")
-	if models.Login(username, password) {
+	if models.Auth(username, password) {
 		u.Data["json"] = "login success"
 	} else {
 		u.Data["json"] = "user not exist"

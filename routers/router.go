@@ -1,10 +1,10 @@
 // @APIVersion 1.0.0
-// @Title beego Test API
-// @Description beego has a very cool tools to autogenerate documents for your API
-// @Contact astaxie@gmail.com
+// @Title myuser API
+// @Description A user system for multi-platforms.
+// @Contact hsowan.me@gmail.com
 // @TermsOfServiceUrl http://beego.me/
-// @License Apache 2.0
-// @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html
+// @License MIT
+// @LicenseUrl https://github.com/hsowan-me/myuser/blob/master/LICENSE
 package routers
 
 import (
