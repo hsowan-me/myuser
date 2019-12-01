@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"myuser/models"
 	"encoding/json"
 
@@ -20,59 +21,54 @@ type UserController struct {
 // @router / [post]
 func (u *UserController) Post() {
 	var user models.User
-	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	uid := models.AddUser(user)
-	u.Data["json"] = map[string]string{"uid": uid}
-	u.ServeJSON()
-}
-
-// @Title GetAll
-// @Description get all Users
-// @Success 200 {object} models.User
-// @router / [get]
-func (u *UserController) GetAll() {
-	users := models.GetAllUsers()
-	u.Data["json"] = users
-	u.ServeJSON()
-}
-
-// @Title Get
-// @Description get user by uid
-// @Param	uid		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.User
-// @Failure 403 :uid is empty
-// @router /:uid [get]
-func (u *UserController) Get() {
-	uid := u.GetString(":uid")
-	if uid != "" {
-		user, err := models.GetUser(uid)
-		if err != nil {
-			u.Data["json"] = err.Error()
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &user); err == nil {
+		fmt.Println(user)
+		if uid, e := models.AddUser(user); e == nil {
+			u.Data["json"] = map[string]int64{"uid": uid}
 		} else {
-			u.Data["json"] = user
+			u.Data["json"] = e.Error()
 		}
+	} else {
+		u.Data["json"] = err.Error()
 	}
 	u.ServeJSON()
 }
 
-// @Title Update
+// @Title Get the user
+// @Description get user by uid
+// @Param	uid		path 	int64	true		"The key for staticblock"
+// @Success 200 {object} models.User
+// @Failure 403 :uid is empty
+// @router /:uid [get]
+func (u *UserController) Get() {
+	uid, err := u.GetInt64(":uid")
+	if err == nil {
+		user, e := models.GetUserById(uid)
+		if e != nil {
+			u.Data["json"] = e.Error()
+		} else {
+			u.Data["json"] = user
+		}
+	} else {
+		u.Data["json"] = err.Error()
+	}
+	u.ServeJSON()
+}
+
+// @Title Update the user
 // @Description update the user
-// @Param	uid		path 	string	true		"The uid you want to update"
+// @Param	uid		path 	int64	true		"The uid you want to update"
 // @Param	body		body 	models.User	true		"body for user content"
 // @Success 200 {object} models.User
 // @Failure 403 :uid is not int
-// @router /:uid [put]
+// @router / [put]
 func (u *UserController) Put() {
-	uid := u.GetString(":uid")
-	if uid != "" {
-		var user models.User
-		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-		uu, err := models.UpdateUser(uid, &user)
-		if err != nil {
-			u.Data["json"] = err.Error()
-		} else {
-			u.Data["json"] = uu
-		}
+	var user models.User
+	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	if models.UpdateUser(&user) {
+		u.Data["json"] = "Update success!"
+	} else {
+		u.Data["json"] = "Update fail!"
 	}
 	u.ServeJSON()
 }
@@ -84,26 +80,36 @@ func (u *UserController) Put() {
 // @Failure 403 uid is empty
 // @router /:uid [delete]
 func (u *UserController) Delete() {
-	uid := u.GetString(":uid")
-	models.DeleteUser(uid)
-	u.Data["json"] = "delete success!"
+	if uid, err := u.GetInt64(":uid"); err == nil {
+		if models.DeleteUser(uid) {
+			u.Data["json"] = "Delete success!"
+		} else {
+			u.Data["json"] = "Delete fail!"
+		}
+	} else {
+		u.Data["json"] = "Bad request!"
+	}
 	u.ServeJSON()
 }
 
-// @Title Login
-// @Description Logs user into the system
-// @Param	username		query 	string	true		"The username for login"
-// @Param	password		query 	string	true		"The password for login"
+// @Title Auth
+// @Description Auth
+// @Param	principle		query 	string	true		"The principle for auth"
+// @Param	password		query 	string	true		"The password for auth"
 // @Success 200 {string} login success
 // @Failure 403 user not exist
 // @router /auth [post]
 func (u *UserController) Auth() {
-	username := u.GetString("username")
+	principle := u.GetString("principle")
 	password := u.GetString("password")
-	if models.Auth(username, password) {
-		u.Data["json"] = "login success"
+	if authType, err := u.GetInt("authType"); err == nil {
+		if models.Auth(principle, password, authType) {
+			u.Data["json"] = "login success!"
+		} else {
+			u.Data["json"] = "login fail!"
+		}
 	} else {
-		u.Data["json"] = "user not exist"
+		u.Data["json"] = "Error auth type!"
 	}
 	u.ServeJSON()
 }

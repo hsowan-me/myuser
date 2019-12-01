@@ -5,8 +5,9 @@ A user system for multi-platforms.
 ## Todo
 
 * [x] Swagger API
-* [ ] models
-* [ ] controllers
+* [ ] Models
+* [ ] Controllers
+* [ ] Support multi-conf
 
 ## OAuth
 
@@ -17,9 +18,8 @@ A user system for multi-platforms.
 ## Start
 
 ```shell script
-# dev
+# Init db before run
 bee run
-# 
 ```
 
 ## Environment
